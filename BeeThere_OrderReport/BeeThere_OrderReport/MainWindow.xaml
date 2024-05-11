@@ -1,0 +1,21 @@
+﻿<Window
+    x:Class="BeeThere_OrderReport.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BeeThere_OrderReport"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,5">
+            <TextBlock x:Name="tbUsername">Username:</TextBlock>
+            <TextBox x:Name="txtUsername" Width="200"></TextBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,5">
+            <TextBlock x:Name="tbPassword">Password:</TextBlock>
+            <TextBox x:Name="txtPassword" Width="200"></TextBox>
+        </StackPanel>
+        <Button x:Name="myButton" Click="MyButton_Click" Margin="10,5">Submit</Button>
+    </StackPanel>
+</Window>

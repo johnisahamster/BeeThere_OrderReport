@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BeeThere_OrderReport (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "BeeThere_OrderReport (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
