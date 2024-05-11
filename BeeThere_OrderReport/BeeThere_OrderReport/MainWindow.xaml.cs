@@ -1,10 +1,12 @@
-﻿using Microsoft.UI.Xaml;
+﻿using BeeThere_OrderReport.Classes.SquareAPIs;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using Square.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,9 +30,17 @@ namespace BeeThere_OrderReport
             this.InitializeComponent();
         }
 
+        public async void GetOrders()
+        {
+            Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
+            Classes.SquareAPIs.OrderCollector collector = new Classes.SquareAPIs.OrderCollector(sqAPI.GetClient());
+            Queue<Order> orders = new Queue<Order>();
+            await collector.GetOrders(orders);
+        }
+
         private void MyButton_Click(object sender, RoutedEventArgs e)
         {
-            myButton.Content = "Clicked";
+            GetOrders();
         }
     }
 
