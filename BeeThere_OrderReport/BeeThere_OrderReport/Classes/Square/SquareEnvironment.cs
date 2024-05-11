@@ -13,7 +13,7 @@ namespace BeeThere_OrderReport.Classes.Square
         protected string application_id;
         protected string access_token;
 
-        public string getAppID() { return application_id; }
-        public string getAccessToken() { return access_token; }
+        public string GetAppID() { return application_id; }
+        public string GetAccessToken() { return access_token; }
     }
 }
