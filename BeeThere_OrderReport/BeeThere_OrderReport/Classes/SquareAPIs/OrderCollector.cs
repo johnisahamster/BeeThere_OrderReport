@@ -1,4 +1,6 @@
-﻿using Square;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Square;
 using Square.Apis;
 using Square.Exceptions;
 using Square.Models;
@@ -20,19 +22,19 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
             this.client = client;
         }
 
-        private ISquareClient client;
+        private readonly ISquareClient client;
         public ISquareClient Client { get { return client; } }
 
         
-        public async Task GetOrders(Queue<Order> orders, DateTime from, DateTime to, bool dec = false)
+        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, DateTime from, DateTime to, bool dec = false)
         {
             IOrdersApi ordersapi = client.OrdersApi;
 
             SearchOrdersFilter filter = new SearchOrdersFilter.Builder()
                 .DateTimeFilter(new SearchOrdersDateTimeFilter.Builder()
                     .CreatedAt(new TimeRange.Builder()
-                        .StartAt(from.ToLongDateString())
-                        .EndAt(to.ToLongDateString())
+                        .StartAt(from.ToShortDateString())
+                        .EndAt(to.ToShortDateString())
                         .Build()
                     ).Build()
                 ).Build();
@@ -40,15 +42,16 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
                 .SortOrder((dec) ? "DEC" : "ASC")
                 .Build();
 
-            SearchOrdersQuery query = new SearchOrdersQuery(filter, sort);
+            SearchOrdersQuery query = new(filter, sort);
 
             SearchOrdersRequest request = new SearchOrdersRequest.Builder()
                 .Query(query)
+                .LocationIds(locationIDs)
                 .ReturnEntries(false)
                 .Build();
             
             //TODO: implement cancellation token
-            CancellationToken cancellationToken = new CancellationToken();
+            CancellationToken cancellationToken = new();
             SearchOrdersResponse response;
 
             try
@@ -58,25 +61,39 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
             }
             catch (ApiException e)
             {
-                string message = "ERROR! Something happened while trying to reach the Square API:\n" + e.Message;
-                MessageDialog dialog = new MessageDialog(message);
-                dialog.Title = "Square API Exception";
+                string message = "ERROR! Something happened while trying to reach the Square API:\n" + e.Message + "\n";
+
+                foreach (var item in e.Errors)
+                {
+                    message += item.Code + " - " + item.Detail + "\n";
+                }
+
+                ContentDialog dialog = new()
+                {
+                    Title = "Square API Exception",
+                    Content = message,
+                    XamlRoot = xamlRoot
+                };
+                
                 await dialog.ShowAsync();
                 throw;
             }
 
-            if (response == null || response.Orders.Count == 0)
+            if (response == null || response.Orders == null || response.Orders.Count == 0)
             {
-                string message = "No orders returned.";
-                MessageDialog dialog = new MessageDialog(message);
+                ContentDialog dialog = new()
+                {
+                    Content = "No orders returned.",
+                    XamlRoot = xamlRoot
+                };
+
                 await dialog.ShowAsync();
-                return;
+                return new Queue<Order>();
             }
 
-            orders = new Queue<Order>(response.Orders);
-            return;
+            return new Queue<Order>(response.Orders);
         }
-        public async Task GetOrders(Queue<Order> orders, bool dec = false) { await GetOrders(orders, DateTime.Now.AddMonths(1), DateTime.Now, dec); }
+        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, bool dec = false) { return await GetOrders(xamlRoot, locationIDs, DateTime.Now.AddMonths(-1), DateTime.Now, dec); }
         
     }
 }

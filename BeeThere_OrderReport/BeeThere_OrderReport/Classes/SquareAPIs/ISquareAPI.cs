@@ -11,5 +11,6 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
     internal interface ISquareAPI
     {
         public abstract ISquareClient GetClient();
+        public abstract IList<string> GetLocationIDs();
     }
 }

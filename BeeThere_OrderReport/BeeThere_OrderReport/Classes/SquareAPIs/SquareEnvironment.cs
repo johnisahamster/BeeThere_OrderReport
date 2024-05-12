@@ -20,6 +20,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
         protected string application_id;
         protected string access_token;
         protected ISquareClient client;
+        protected List<string> locationIDs;
 
         public string GetAppID() { return application_id; }
         public string GetAccessToken() { return access_token; }
@@ -28,7 +29,9 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
         {
             if (config == null)
             {
-                var builder = new ConfigurationBuilder().AddJsonFile($"appsettings.json", optional: true, reloadOnChange: true);
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath("C:\\Users\\johnh\\source\\repos\\BeeThere\\OrderReport\\BeeThere_OrderReport\\BeeThere_OrderReport")
+                    .AddJsonFile($"appsettings.json", optional: true, reloadOnChange: true);
                 config = builder.Build();
             }
             return config;

@@ -42,5 +42,24 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
 
             return client;
         }
+
+        public IList<string> GetLocationIDs()
+        {
+            try
+            {
+                IConfigurationRoot config = GetConfigRoot();
+                string s = config["AppSettings:Square:SandboxLocationID"];
+                locationIDs = new List<string>
+                {
+                    s
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return locationIDs;
+        }
     }
 }

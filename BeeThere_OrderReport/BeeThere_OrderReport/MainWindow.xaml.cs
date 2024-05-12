@@ -33,9 +33,13 @@ namespace BeeThere_OrderReport
         public async void GetOrders()
         {
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
-            Classes.SquareAPIs.OrderCollector collector = new Classes.SquareAPIs.OrderCollector(sqAPI.GetClient());
-            Queue<Order> orders = new Queue<Order>();
-            await collector.GetOrders(orders);
+            Classes.SquareAPIs.OrderCollector collector = new(sqAPI.GetClient());
+            Queue<Order> orders = await collector.GetOrders(spRoot.XamlRoot, sqAPI.GetLocationIDs());
+
+            foreach (Order order in orders)
+            {
+                Console.WriteLine(order);
+            }
         }
 
         private void MyButton_Click(object sender, RoutedEventArgs e)

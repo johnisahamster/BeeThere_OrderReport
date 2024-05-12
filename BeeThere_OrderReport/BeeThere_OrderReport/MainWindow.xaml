@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel x:Name="spRoot" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,5">
             <TextBlock x:Name="tbUsername">Username:</TextBlock>
             <TextBox x:Name="txtUsername" Width="200"></TextBox>
