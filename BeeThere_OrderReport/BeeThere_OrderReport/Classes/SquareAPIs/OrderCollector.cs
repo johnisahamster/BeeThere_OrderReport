@@ -61,33 +61,14 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
             }
             catch (ApiException e)
             {
-                string message = "ERROR! Something happened while trying to reach the Square API:\n" + e.Message + "\n";
-
-                foreach (var item in e.Errors)
-                {
-                    message += item.Code + " - " + item.Detail + "\n";
-                }
-
-                ContentDialog dialog = new()
-                {
-                    Title = "Square API Exception",
-                    Content = message,
-                    XamlRoot = xamlRoot
-                };
-                
-                await dialog.ShowAsync();
+                string message = "ERROR! Something happened while trying to reach the Square API:\n";
+                await ContentDialogMaker.APIError(xamlRoot, e, message, "Square API Exception");
                 throw;
             }
 
             if (response == null || response.Orders == null || response.Orders.Count == 0)
             {
-                ContentDialog dialog = new()
-                {
-                    Content = "No orders returned.",
-                    XamlRoot = xamlRoot
-                };
-
-                await dialog.ShowAsync();
+                await ContentDialogMaker.Run(xamlRoot, "No orders returned.");
                 return new Queue<Order>();
             }
 
