@@ -50,27 +50,19 @@ namespace BeeThere_OrderReport.Classes
             return await dialog.ShowAsync();
         }
 
-        public static async Task<ContentDialogResult> APIError(XamlRoot xamlRoot, ApiException e, string message = "", string title = "API Exception")
+        public static async Task<ContentDialogResult> APIError(XamlRoot xamlRoot, ApiException e, string message = "API Error: ", string title = "API Exception")
         {
-            string output_msg = "";
-
-            if (message != "")
-            {
-                output_msg = message + e.Message + "\n";
-            }
-            else
-            {
-                output_msg = "API Error: " + e.Message + "\n";
-            }
+            string output_msg = message + e.Message + "\n";
+            
             foreach (var item in e.Errors)
             {
-                message += item.Code + " - " + item.Detail + "\n";
+                output_msg += item.Code + " - " + item.Detail + "\n";
             }
 
             ContentDialog dialog = new()
             {
                 Title = title,
-                Content = message,
+                Content = output_msg,
                 XamlRoot = xamlRoot,
                 CloseButtonText = "Ok"
             };
