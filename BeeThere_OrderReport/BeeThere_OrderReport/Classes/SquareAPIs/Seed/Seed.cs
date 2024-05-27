@@ -20,8 +20,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
             ISquareAPI api = new Sandbox();
             client = api.GetClient();
 
-            hash = "4429380778C94E47427C1753BAF91E0D8AF78985AA9F3868CF3FC07456F7BAFA";
-
+            hash = "4429380778C94E47427C1753BAF91E0D8AF78985AA9F3868CF3FC07456F7BAFA"; 
         }
 
         public void Run()
@@ -38,11 +37,8 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
 
             for (int i = 0; i < n; i++)
             {
-                customers[i] = new Customer();
-            }
+                customers.Add(new Customer());
 
-            for (int i = 0; i < n; i++)
-            {
                 CreateCustomerRequest request = new CreateCustomerRequest.Builder()
                     .Address(new Square.Models.Address.Builder()
                         .AddressLine1(customers[i].Address)
@@ -62,6 +58,29 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
             }
 
             return customers;
+        }
+
+        public IList<CatalogItem> GenerateCatalogItems(int n = 5)
+        {
+            List<CatalogItem> items = new();
+
+            for (int i = 0; i < n; i++)
+            {
+                items.Add(new CatalogItem());
+
+                UpsertCatalogObjectRequest request = new UpsertCatalogObjectRequest.Builder(
+                        hash + 2.ToString() + i.ToString(),
+                        new CatalogObject.Builder("ITEM", "#" + items[i].Name)
+                            .ImageData(new CatalogImage(null, items[i].ImageURL))
+                            .ItemData(
+                                new Square.Models.CatalogItem.Builder()
+                                .Name(items[i].Name)
+                                .Build()
+                            ).Build()
+                ).Build();
+            }
+
+            return items;
         }
 
 
