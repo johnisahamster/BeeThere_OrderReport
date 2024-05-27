@@ -43,7 +43,22 @@ namespace BeeThere_OrderReport
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
+
+            // Create a Frame to act as the navigation context and navigate to the first page
+            Frame rootFrame = new Frame();
+            rootFrame.NavigationFailed += OnNavigationFailed;
+
+            rootFrame.Navigate(typeof(MainPage), args.Arguments);
+
+            // Place the frame in the current Window
+            m_window.Content = rootFrame;
+
             m_window.Activate();
+        }
+
+        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
+        {
+            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
 
         private Window m_window;

@@ -1,4 +1,3 @@
-﻿using BeeThere_OrderReport.Classes.SquareAPIs;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Devices.Enumeration;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -21,14 +21,18 @@ using Windows.Foundation.Collections;
 namespace BeeThere_OrderReport
 {
     /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
+    /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainPage : Page
     {
-        public MainWindow()
+        public MainPage()
         {
             this.InitializeComponent();
         }
-    }
 
+        private void MyButton_Click(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(PrintOptionsPage));
+        }
+    }
 }
