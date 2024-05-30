@@ -13,6 +13,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Square.Models;
+using BeeThere_OrderReport.Classes;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -29,21 +31,23 @@ namespace BeeThere_OrderReport
             this.InitializeComponent();
         }
 
-        public async void GetOrders()
+        public async Task<Queue<Order>> GetOrders()
         {
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
             Classes.SquareAPIs.OrderCollector collector = new(sqAPI.GetClient());
-            Queue<Order> orders = await collector.GetOrders(spRoot.XamlRoot, sqAPI.GetLocationIDs());
-
-            foreach (Order order in orders)
-            {
-                Console.WriteLine(order);
-            }
+            Queue<Order> orders = await collector.GetOrders(this.XamlRoot, sqAPI.GetLocationIDs());
+            return orders;
         }
 
-        private void SubmitButton_Click(object sender, RoutedEventArgs e)
+        private async void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
-            GetOrders();
+            Queue<Order> orders = await GetOrders();
+            if (orders.Count == 0) { return; }
+
+            Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
+            
+            await OrderReportGenerator.Generate(sqAPI.GetClient(), orders);
+
         }
     }
 }
