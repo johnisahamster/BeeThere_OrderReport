@@ -10,6 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <StackPanel x:Name="spRoot" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button x:Name="filePickButton" Click="FilePickButton_Click" Margin="10,5">Select File Location</Button>
         <Button x:Name="submitButton" Click="SubmitButton_Click" Margin="10,5">Submit</Button>
     </StackPanel>
 </Page>

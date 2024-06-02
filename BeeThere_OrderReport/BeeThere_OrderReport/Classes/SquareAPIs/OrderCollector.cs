@@ -51,13 +51,13 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
                 .Build();
             
             //TODO: implement cancellation token
-            CancellationToken cancellationToken = new();
+            //CancellationToken cancellationToken = new();
             SearchOrdersResponse response;
 
             try
             {
-                response = await ordersapi.SearchOrdersAsync(request, cancellationToken);
-                Console.WriteLine("Successfully called SearchOrders");
+                response = await ordersapi.SearchOrdersAsync(request);
+                System.Diagnostics.Debug.WriteLine("Successfully called SearchOrders");
             }
             catch (ApiException e)
             {
@@ -74,7 +74,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
 
             return new Queue<Order>(response.Orders);
         }
-        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, bool dec = false) { return await GetOrders(xamlRoot, locationIDs, DateTime.Now.AddMonths(-1), DateTime.Now, dec); }
+        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, bool dec = false) { return await GetOrders(xamlRoot, locationIDs, DateTime.Now.AddMonths(-1).AddDays(1), DateTime.Now.AddDays(1), dec); }
         
     }
 }

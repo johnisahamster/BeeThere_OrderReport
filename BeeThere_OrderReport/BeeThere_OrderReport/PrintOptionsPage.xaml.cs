@@ -15,6 +15,10 @@ using Windows.Foundation.Collections;
 using Square.Models;
 using BeeThere_OrderReport.Classes;
 using System.Threading.Tasks;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
+using Windows.Storage;
+using Windows.Storage.Pickers.Provider;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -26,6 +30,9 @@ namespace BeeThere_OrderReport
     /// </summary>
     public sealed partial class PrintOptionsPage : Page
     {
+        Stream filestream = null;
+        string filename = null;
+
         public PrintOptionsPage()
         {
             this.InitializeComponent();
@@ -35,19 +42,61 @@ namespace BeeThere_OrderReport
         {
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
             Classes.SquareAPIs.OrderCollector collector = new(sqAPI.GetClient());
-            Queue<Order> orders = await collector.GetOrders(this.XamlRoot, sqAPI.GetLocationIDs());
+            Queue<Order> orders = await collector.GetOrders(XamlRoot, sqAPI.GetLocationIDs());
             return orders;
         }
 
         private async void SubmitButton_Click(object sender, RoutedEventArgs e)
         {
+            if (filestream == null)
+            {
+                await ContentDialogMaker.Run(xamlRoot: XamlRoot, message: "You haven't selected a file location.\n A file location is required to save the file.", title: "Wait a second!", button_text: "OK");
+                return;
+            }
+
             Queue<Order> orders = await GetOrders();
             if (orders.Count == 0) { return; }
 
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
             
-            await OrderReportGenerator.Generate(sqAPI.GetClient(), orders);
+            await OrderReportGenerator.Generate(XamlRoot, sqAPI.GetClient(), orders, filestream);
+            
+            await filestream.FlushAsync();
+            filestream.Close();
 
+            await ContentDialogMaker.Run(xamlRoot: XamlRoot, message: "The report has been saved to " + filename + ".", title: "File saved!", button_text: "OK");
         }
+
+        private async void FilePickButton_Click(object sender, RoutedEventArgs e)
+        {
+            while (true)
+            {
+                FileSavePicker savePicker = new FileSavePicker();
+                savePicker.DefaultFileExtension = ".pdf";
+                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                savePicker.SuggestedFileName = "Orders_" + DateTime.Now.ToString("yy_MM_dd_hh_mm_ss");
+                savePicker.CommitButtonText = "OK";
+                savePicker.FileTypeChoices.Add("PDF", new List<string>() { ".pdf" } );
+
+                StorageFile file = null;
+
+                nint windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow);
+                InitializeWithWindow.Initialize(savePicker, windowHandle);
+
+                file = await savePicker.PickSaveFileAsync();
+
+                if (file != null)
+                {
+                    filename = file.Name;
+                    filestream = await file.OpenStreamForWriteAsync();
+                    return;
+                }
+                else
+                {
+                    await ContentDialogMaker.Run(xamlRoot: XamlRoot, message: "File loaded incorrectly.\nPlease choose another file.", title: "File Error", button_text: "OK");
+                }
+            }
+        }
+
     }
 }

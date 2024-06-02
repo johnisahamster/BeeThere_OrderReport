@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using BeeThere_OrderReport.Classes.SquareAPIs.Seed;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -35,6 +36,9 @@ namespace BeeThere_OrderReport
             this.InitializeComponent();
         }
 
+        private static Window currentwindow;
+        public static Window CurrentWindow { get => currentwindow; }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
@@ -43,6 +47,7 @@ namespace BeeThere_OrderReport
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
+            currentwindow = m_window;
 
             // Create a Frame to act as the navigation context and navigate to the first page
             Frame rootFrame = new Frame();
