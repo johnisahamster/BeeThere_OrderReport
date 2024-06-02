@@ -21,8 +21,8 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
         public string PriceCurrency { get; set; }
         public string SKU { get; set; }
     
-        CatalogVariationItem() {
-            Name = Faker.Lorem.GetFirstWord();
+        public CatalogVariationItem() {
+            Name = Faker.Name.Middle();
             PricingType = Faker.Enum.Random<PricingType>();
             PriceValue = Faker.RandomNumber.Next(0, 10000);
             PriceCurrency = "CAD";

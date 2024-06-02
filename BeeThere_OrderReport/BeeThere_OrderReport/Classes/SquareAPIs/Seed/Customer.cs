@@ -15,7 +15,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
         public string LastName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
-        public string PhoneNumber { get; set; }
+        //public string PhoneNumber { get; set; }
         public string PostalCode { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string EmailAddress { get; set; }
@@ -26,7 +26,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
             LastName = Faker.Name.Last();
             Address = Faker.Address.StreetAddress();
             City = Faker.Address.City();
-            PhoneNumber = Faker.Phone.Number();
+            //PhoneNumber = Faker.Phone.Number();
             PostalCode = PostalCodeGen();
             DateOfBirth = Faker.Identification.DateOfBirth();
             EmailAddress = Faker.Internet.Email();
@@ -44,6 +44,11 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs.Seed
             output += Faker.RandomNumber.Next(0, 10).ToString();
 
             return output;
+        }
+
+        public override string ToString()
+        {
+            return Id + ": " + FirstName + " " + LastName + " (" + EmailAddress + ")";
         }
     }
 }
