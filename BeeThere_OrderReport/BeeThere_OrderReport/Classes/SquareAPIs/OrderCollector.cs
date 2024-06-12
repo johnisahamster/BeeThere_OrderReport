@@ -26,7 +26,7 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
         public ISquareClient Client { get { return client; } }
 
         
-        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, DateTime from, DateTime to, bool dec = false)
+        public async Task<List<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, DateTime from, DateTime to, bool dec = false)
         {
             IOrdersApi ordersapi = client.OrdersApi;
 
@@ -69,12 +69,12 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
             if (response == null || response.Orders == null || response.Orders.Count == 0)
             {
                 await ContentDialogMaker.Run(xamlRoot, "No orders returned.");
-                return new Queue<Order>();
+                return new List<Order>();
             }
 
-            return new Queue<Order>(response.Orders);
+            return new List<Order>(response.Orders);
         }
-        public async Task<Queue<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, bool dec = false) { return await GetOrders(xamlRoot, locationIDs, DateTime.Now.AddMonths(-1).AddDays(1), DateTime.Now.AddDays(1), dec); }
+        public async Task<List<Order>> GetOrders(XamlRoot xamlRoot, IList<string> locationIDs, bool dec = false) { return await GetOrders(xamlRoot, locationIDs, DateTime.Now.AddMonths(-1).AddDays(1), DateTime.Now.AddDays(1), dec); }
         
     }
 }

@@ -38,11 +38,11 @@ namespace BeeThere_OrderReport
             this.InitializeComponent();
         }
 
-        public async Task<Queue<Order>> GetOrders()
+        public async Task<List<Order>> GetOrders()
         {
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
             Classes.SquareAPIs.OrderCollector collector = new(sqAPI.GetClient());
-            Queue<Order> orders = await collector.GetOrders(XamlRoot, sqAPI.GetLocationIDs());
+            List<Order> orders = await collector.GetOrders(XamlRoot, sqAPI.GetLocationIDs());
             return orders;
         }
 
@@ -54,7 +54,7 @@ namespace BeeThere_OrderReport
                 return;
             }
 
-            Queue<Order> orders = await GetOrders();
+            List<Order> orders = await GetOrders();
             if (orders.Count == 0) { return; }
 
             Classes.SquareAPIs.ISquareAPI sqAPI = new Classes.SquareAPIs.Sandbox();
@@ -69,32 +69,29 @@ namespace BeeThere_OrderReport
 
         private async void FilePickButton_Click(object sender, RoutedEventArgs e)
         {
-            while (true)
+            FileSavePicker savePicker = new FileSavePicker();
+            savePicker.DefaultFileExtension = ".pdf";
+            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            savePicker.SuggestedFileName = "Orders_" + DateTime.Now.ToString("yy_MM_dd_hh_mm_ss");
+            savePicker.CommitButtonText = "OK";
+            savePicker.FileTypeChoices.Add("PDF", new List<string>() { ".pdf" });
+
+            StorageFile file = null;
+
+            nint windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow);
+            InitializeWithWindow.Initialize(savePicker, windowHandle);
+
+            file = await savePicker.PickSaveFileAsync();
+
+            if (file != null)
             {
-                FileSavePicker savePicker = new FileSavePicker();
-                savePicker.DefaultFileExtension = ".pdf";
-                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-                savePicker.SuggestedFileName = "Orders_" + DateTime.Now.ToString("yy_MM_dd_hh_mm_ss");
-                savePicker.CommitButtonText = "OK";
-                savePicker.FileTypeChoices.Add("PDF", new List<string>() { ".pdf" } );
-
-                StorageFile file = null;
-
-                nint windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(App.CurrentWindow);
-                InitializeWithWindow.Initialize(savePicker, windowHandle);
-
-                file = await savePicker.PickSaveFileAsync();
-
-                if (file != null)
-                {
-                    filename = file.Name;
-                    filestream = await file.OpenStreamForWriteAsync();
-                    return;
-                }
-                else
-                {
-                    await ContentDialogMaker.Run(xamlRoot: XamlRoot, message: "File loaded incorrectly.\nPlease choose another file.", title: "File Error", button_text: "OK");
-                }
+                filename = file.Name;
+                filestream = await file.OpenStreamForWriteAsync();
+                return;
+            }
+            else
+            {
+                await ContentDialogMaker.Run(xamlRoot: XamlRoot, message: "File loaded incorrectly.\nPlease choose another file.", title: "File Error", button_text: "OK");
             }
         }
 

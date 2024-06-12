@@ -17,16 +17,15 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
 {
     internal class OrderImageCollector
     {
-        Dictionary<string, string> images;
-        Dictionary<string, string> item_image_pairs;
         XamlRoot xamlRoot;
         bool ready = false;
+        Dictionary<string, string> object_image_pairs;
 
         public OrderImageCollector(XamlRoot xamlRoot, ISquareClient client)
         {
             this.client = client;
             this.xamlRoot = xamlRoot;
-            images = new Dictionary<string, string>();
+            object_image_pairs = new Dictionary<string, string>();
 
             ready = true;
         }
@@ -34,15 +33,36 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
         private readonly ISquareClient client;
         public ISquareClient Client { get { return client; } }
 
-        public async Task GetItemImagePairs(Order order)
+        public async Task<Dictionary<string, byte[]>> GetImagesFromOrders(List<Order> orders)
+        {
+            Dictionary<string,byte[]> imageid_imagepairs = await GetImagesFromIDs( 
+                await GetImageIDs(GetObjectIDs(orders))
+            );
+            return ConnectObjectIDsToImages(imageid_imagepairs);
+        }
+
+        private static List<string> GetObjectIDs(List<Order> orders)
         {
             List<string> objids = new();
-            foreach (OrderLineItem item in order.LineItems)
-            {
-                objids.Add(item.CatalogObjectId);
-            }
-            BatchRetrieveCatalogObjectsRequest objsreq = new BatchRetrieveCatalogObjectsRequest.Builder(objids).Build();
 
+            //create list of unique object ids from line items
+            foreach (var order in orders)
+            {
+                foreach (var item in order.LineItems)
+                {
+                    if (!objids.Contains(item.CatalogObjectId))
+                    {
+                        objids.Add(item.CatalogObjectId);
+                    }
+                }
+            }
+
+            return objids;
+        }
+
+        private async Task<List<string>> GetImageIDs(List<string> object_ids)
+        {
+            BatchRetrieveCatalogObjectsRequest objsreq = new BatchRetrieveCatalogObjectsRequest.Builder(object_ids).Build();
             BatchRetrieveCatalogObjectsResponse objectsResponse = new();
 
             try
@@ -56,29 +76,32 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
                 throw;
             }
 
+            List<string> image_ids = new();
+
             foreach (var obj in objectsResponse.Objects)
             {
                 try
                 {
-                    var imageid = obj.ItemVariationData.ImageIds[0];
-                    item_image_pairs.Add(obj.Id, imageid);
-                    if (!images.ContainsKey(imageid))
+                    var imageid = obj.ItemData.ImageIds[0];
+                    object_image_pairs.Add(obj.Id, imageid);
+                    if (!image_ids.Contains(imageid))
                     {
-                        images.Add(imageid, null);
+                        image_ids.Add(imageid);
                     }
                 }
-                catch 
-                { 
-                    item_image_pairs.Add(obj.Id, null); 
+                catch (Exception e) 
+                {
+                    object_image_pairs.Add(obj.Id, null);
                 }
             }
+
+            return image_ids;
         }
 
-        private async Task GetImageUrls()
+        private async Task<Dictionary<string, byte[]>> GetImagesFromIDs(List<string> imageids)
         {
             BatchRetrieveCatalogObjectsRequest request = new BatchRetrieveCatalogObjectsRequest
-                .Builder(images.Keys.ToList()).Build();
-
+                .Builder(imageids).Build();
             BatchRetrieveCatalogObjectsResponse response = new();
 
             try
@@ -92,36 +115,35 @@ namespace BeeThere_OrderReport.Classes.SquareAPIs
                 throw;
             }
 
-            foreach(var image in response.Objects)
+            Dictionary<string, byte[]> images = new();
+
+            foreach (var image in response.Objects)
             {
-                images[image.Id] = image.ImageData.Url;
-            }
-        }
-
-        public async Task<List<byte[]>> GetImages(Order order)
-        {
-            List<byte[]> output = new();
-            while (!ready) { }
-
-            await GetItemImagePairs(order);
-
-            foreach (var imageid in order.LineItems)
-            {   
-                output.Add(await DownloadImage(""));
+                images.Add(image.Id, await DownloadImage(image.ImageData.Url));
             }
 
-            return output;
+            return images;
         }
 
-        public async Task<byte[]> DownloadImage(string imageUrl)
+        private Dictionary<string, byte[]> ConnectObjectIDsToImages(Dictionary<string, byte[]> images)
         {
-            HttpClient client = new HttpClient();
+            Dictionary<string, byte[]> images_from_obj_ids = new();
+            foreach (var obj in object_image_pairs)
+            {
+                images_from_obj_ids.Add(obj.Key, images[obj.Value]);
+            }
+            return images_from_obj_ids;
+        }
+
+        private static async Task<byte[]> DownloadImage(string imageUrl)
+        {
+            HttpClient client = new();
             Stream stream = await client.GetStreamAsync(imageUrl);
             Bitmap bitmap; bitmap = new Bitmap(stream);
 
             if (bitmap != null)
             {
-                ImageConverter converter = new ImageConverter();
+                ImageConverter converter = new();
                 var output = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
 
                 stream.Flush();

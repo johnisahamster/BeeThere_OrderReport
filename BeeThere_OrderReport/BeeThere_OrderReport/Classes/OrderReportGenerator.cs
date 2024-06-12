@@ -17,24 +17,24 @@ namespace BeeThere_OrderReport.Classes
 {
     internal class OrderReportGenerator
     {
-        public static async Task Generate(XamlRoot xamlRoot, ISquareClient client, Queue<Order> orders, Stream stream)
+
+        public static async Task Generate(XamlRoot xamlRoot, ISquareClient client, List<Order> orders, Stream stream)
         {
             QuestPDF.Settings.License = LicenseType.Community;
 
             List<IDocument> doc = new List<IDocument>();
-            List<byte[]> images = new List<byte[]>();
             OrderImageCollector collector = new OrderImageCollector(xamlRoot, client);
+            Dictionary<string, byte[]> images_from_object_id = new();//await collector.GetImagesFromOrders(orders);
 
             foreach (Order order in orders)
             {
-                //images = await collector.GetImages(order);
-                doc.Add(MakeDoc(order, images));
+                doc.Add(MakeDoc(order, images_from_object_id));
             }
 
             Document.Merge(doc).GeneratePdf(stream);
         }
 
-        private static IDocument MakeDoc(Order order, List<byte[]> images)
+        private static IDocument MakeDoc(Order order, Dictionary<string, byte[]> images)
         {
             return Document.Create(container =>
             {
@@ -66,8 +66,8 @@ namespace BeeThere_OrderReport.Classes
 
                                 for (int i = 0; i < order.LineItems.Count; i++)
                                 {
-                                    //x.Cell().Element(Block).Image(images[i]); //image
-                                    x.Cell().Element(Block).Image(Placeholders.Image(20,20)); //image
+                                    //x.Cell().Element(Block).Image(images[order.LineItems[i].CatalogObjectId]); //image
+                                    x.Cell().Element(Block).Image(Placeholders.Image(200,200));
                                     x.Cell().Element(Block).Text(order.LineItems[i].Name); //item
                                     x.Cell().Element(Block).Text(order.LineItems[i].BasePriceMoney.ToString()); //price
                                     x.Cell().Element(Block).Text(order.LineItems[i].Quantity); //qty
